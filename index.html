@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ご確認</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+:root{--red:#990000;--ink:#26272e;--sub:#6b6d76;--line:#ded9d1;--bg:#f6f3ee;--card:#fff;--rule:#faf7f2;--menu:#edf3f8;--ok:#1e6b39}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{font-family:"Hiragino Sans","Yu Gothic","游ゴシック","Meiryo",sans-serif;color:var(--ink);background:var(--bg);line-height:1.6;font-size:16px;padding-bottom:120px}
+header{background:#fff;border-bottom:4px solid var(--red);padding:18px 16px 14px}
+.wrap{max-width:640px;margin:0 auto}
+h1{font-family:"Hiragino Mincho ProN","Yu Mincho","游明朝",serif;font-size:22px;margin:0 0 4px;letter-spacing:.02em}
+.lead{margin:0;color:var(--sub);font-size:14px}
+.lead b{color:var(--ink)}
+.now{margin-top:10px;background:var(--rule);border-radius:10px;padding:8px 12px;font-size:14px;font-weight:700}
+.now.all{background:#e1f1e7;color:var(--ok)}
+.saved{font-size:12px;color:var(--ok);margin:8px 0 0;min-height:18px}
+.log{margin:0 auto 14px;font-size:13px;color:var(--sub)}
+.log summary{cursor:pointer;padding:6px 2px}
+.log ol{margin:6px 0 0;padding-left:22px}
+.stat{font-size:13px;color:var(--sub);text-align:right;flex:none;max-width:55%}
+.stat.ng{color:var(--red);font-weight:700}
+main{padding:14px 12px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 14px;margin:0 0 14px;scroll-margin-top:12px}
+.card.done{border-color:var(--ok)}
+.qh{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
+.no{flex:none;width:34px;height:34px;border-radius:50%;background:var(--red);color:#fff;font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center}
+.card.done .no{background:var(--ok)}
+.qt,.bx,.opt .t,.why,.quote,.lead{text-wrap:pretty;word-break:auto-phrase}
+.qt{text-wrap:balance}
+.qt{font-size:18px;font-weight:700;line-height:1.4;padding-top:3px}
+.why{font-size:13px;color:var(--sub);margin:0 0 10px}
+.pic{width:100%;border-radius:8px;border:1px solid var(--line);display:block;margin-bottom:6px}
+.cap{font-size:12px;color:var(--sub);margin:0 0 10px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.bx{border-radius:10px;padding:10px 12px;background:var(--rule);font-weight:700;font-size:15px;line-height:1.5}
+.bx.m{background:var(--menu)}
+.bx span{display:block;font-size:12px;font-weight:400;color:var(--sub);margin-bottom:2px}
+.quote{border-left:6px solid var(--red);background:var(--rule);padding:10px 12px;border-radius:0 10px 10px 0;font-weight:700;margin-bottom:10px}
+.quote span{display:block;font-size:12px;font-weight:400;color:var(--sub)}
+.opts{display:grid;gap:8px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;font:inherit;color:inherit;background:#fff;border:2px solid var(--line);border-radius:12px;padding:12px 14px;min-height:60px;cursor:pointer}
+.opt .k{flex:none;width:32px;height:32px;border-radius:8px;border:2px solid var(--red);color:var(--red);font-weight:700;font-size:17px;display:flex;align-items:center;justify-content:center}
+.opt .t{font-weight:700;font-size:16px;line-height:1.4}
+.opt .t small{display:block;font-weight:400;font-size:13px;color:var(--sub)}
+.opt.on{border-color:var(--red);background:#fdf3f3}
+.opt.on .k{background:var(--red);color:#fff}
+.opt.skip{min-height:44px;padding:8px 14px;border-style:dashed}
+.opt.skip .t{font-weight:400;font-size:14px;color:var(--sub)}
+.opt.skip.on{background:#f1f1f1;border-color:#888;border-style:solid}
+.memo{margin-top:10px}
+.memo summary{font-size:14px;color:var(--sub);cursor:pointer;padding:6px 0}
+textarea{width:100%;font:inherit;border:1px solid var(--line);border-radius:10px;padding:10px;min-height:72px;resize:vertical;background:#fff;color:inherit}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom));z-index:5}
+.bar .wrap{display:flex;gap:12px;align-items:center}
+.prog{flex:1;font-size:14px;color:var(--sub)}
+.prog b{font-size:20px;color:var(--ink)}
+.dots{display:flex;gap:6px;margin-top:4px}
+.dots i{width:22px;height:6px;border-radius:3px;background:var(--line)}
+.dots i.on{background:var(--ok)}
+.send{flex:none;font:inherit;font-weight:700;font-size:17px;color:#fff;background:var(--red);border:0;border-radius:12px;padding:14px 26px;min-height:54px;cursor:pointer}
+.send[disabled]{background:#c9c4bc;cursor:default}
+.fin{display:none;text-align:center;padding:48px 16px}
+.fin h2{font-family:"Hiragino Mincho ProN","Yu Mincho","游明朝",serif;font-size:24px;margin:0 0 8px}
+.fin .sum{display:inline-block;text-align:left;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:16px 0;font-size:16px;white-space:pre-line}
+.fin button{font:inherit;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 18px;cursor:pointer}
+.err{color:var(--red);font-size:14px;margin-top:8px}
+.foot{font-size:12px;color:var(--sub);text-align:center;padding:4px 16px 0}
+@media (min-width:600px){.opts.two{grid-template-columns:1fr 1fr}.opts.two .skip{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1 id="ttl"></h1>
+  <p class="lead" id="lead"></p>
+  <div class="now" id="now">読み込み中…</div>
+</div></header>
+
+<main class="wrap" id="form"></main>
+<p class="foot wrap" id="foot"></p>
+
+<details class="log wrap" id="logbox" style="padding:0 14px"><summary>これまでの動き（いつ・どれを押したか）</summary><ol id="log"></ol></details>
+
+<div class="bar" id="bar" style="display:none"><div class="wrap">
+  <div class="prog"><b id="cnt">0</b> / <span id="tot">0</span>　答えました<div class="dots" id="dots"></div></div>
+  <div class="stat" id="stat"></div>
+</div></div>
+
+<script>
+var API = 'https://script.google.com/macros/s/AKfycbzODhZcNZLI52k-ezXR90J7GOZmXhvnMKCROEWTGpoWExPOeBS43skdCnapJFqLECtC-Q/exec';
+var K = (location.search.match(/[?&]k=([^&]+)/) || [])[1] || '';
+var Q = [], S = {A:{}, M:{}, T:{}, log:[]}, IDS = [], MARK = '①②③④⑤⑥⑦⑧⑨⑩';
+function esc(x){ return String(x).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function fmt(t){ if (!t) return ''; var d = new Date(t), p = function(n){ return (n < 10 ? '0' : '') + n; }; return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + p(d.getMinutes()); }
+function word(q, v){ if (!v) return ''; if (v === '保留') return 'あとで'; var o = q.o.filter(function(o){ return o[0] === v; })[0]; return v + '（' + (o ? o[1] : '') + '）'; }
+var form = document.getElementById('form'), dots = document.getElementById('dots'), stat = document.getElementById('stat');
+function setStat(t, ng){ stat.textContent = t; stat.className = 'stat' + (ng ? ' ng' : ''); }
+function build(b){
+  Q = b.questions || []; IDS = Q.map(function(q){ return q.id; });
+  document.title = b.title || document.title;
+  document.getElementById('ttl').textContent = b.title || '';
+  document.getElementById('lead').innerHTML = b.lead || '';
+  document.getElementById('foot').textContent = b.foot || '';
+  document.getElementById('tot').textContent = Q.length;
+  form.innerHTML = ''; dots.innerHTML = '';
+  Q.forEach(function(q, i){
+    var c = document.createElement('section'); c.className = 'card'; c.id = q.id;
+    var h = '<div class="qh"><div class="no">' + (i + 1) + '</div><div class="qt">' + esc(q.t) + '</div></div><p class="why">' + esc(q.why) + '</p>' + (q.html || '') + '<div class="opts two">';
+    q.o.forEach(function(o){
+      h += '<button type="button" class="opt" data-q="' + q.id + '" data-v="' + o[0] + '"><span class="k">' + o[0] + '</span><span class="t">' + esc(o[1]) + (o[2] ? '<small>' + esc(o[2]) + '</small>' : '') + '</span></button>';
+    });
+    h += '<button type="button" class="opt skip" data-q="' + q.id + '" data-v="保留"><span class="t">いまは決められない・あとで</span></button></div>';
+    h += '<details class="memo"><summary>ひとこと（書かなくて大丈夫です）</summary><textarea data-m="' + q.id + '" placeholder="補足があれば"></textarea></details><p class="saved" id="sv_' + q.id + '"></p>';
+    c.innerHTML = h; form.appendChild(c); dots.appendChild(document.createElement('i'));
+  });
+  document.getElementById('bar').style.display = '';
+}
+function paint(){
+  var n = 0, last = 0;
+  Q.forEach(function(q, i){
+    var card = document.getElementById(q.id), v = S.A[q.id];
+    card.className = 'card' + (v ? ' done' : '');
+    Array.prototype.forEach.call(card.querySelectorAll('.opt'), function(b){
+      var on = b.getAttribute('data-v') === v; b.className = b.className.replace(/ on/g, '') + (on ? ' on' : ''); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    var ta = card.querySelector('textarea');
+    if (document.activeElement !== ta && ta.value !== (S.M[q.id] || '')) { ta.value = S.M[q.id] || ''; if (ta.value) card.querySelector('details').open = true; }
+    document.getElementById('sv_' + q.id).textContent = S.T[q.id] ? '保存済み　' + fmt(S.T[q.id]) : '';
+    dots.children[i].className = v ? 'on' : ''; if (v) n++; if (S.T[q.id] > last) last = S.T[q.id];
+  });
+  document.getElementById('cnt').textContent = n;
+  var now = document.getElementById('now'), all = Q.length && n === Q.length;
+  now.className = 'now' + (all ? ' all' : '');
+  now.textContent = all ? Q.length + 'つともいただきました。ありがとうございます！（最後の更新 ' + fmt(last) + '）' : 'いまの状況：' + Q.length + 'つのうち ' + n + ' つ 回答済み' + (last ? '（最後の更新 ' + fmt(last) + '）' : '');
+  var ol = document.getElementById('log'); ol.innerHTML = '';
+  (S.log || []).slice().reverse().forEach(function(e){
+    var i = IDS.indexOf(e.q); if (i < 0) return; var li = document.createElement('li');
+    li.textContent = fmt(e.t) + '　' + MARK.charAt(i) + ' ' + (e.k === 'm' ? 'ひとこと：' + (e.v || '（消した）') : word(Q[i], e.v));
+    ol.appendChild(li);
+  });
+  document.getElementById('logbox').style.display = (S.log && S.log.length) ? '' : 'none';
+}
+function take(x){ S = {A: x.A || {}, M: x.M || {}, T: x.T || {}, log: x.log || []}; paint(); }
+var busy = 0, ready = false;
+function send(q, k, v){
+  if (k === 'a') S.A[q] = v; else S.M[q] = v; paint();
+  busy++; setStat('保存中…');
+  fetch(API, {method: 'POST', headers: {'Content-Type': 'text/plain;charset=utf-8'}, body: JSON.stringify({k: K, q: q, kind: k, value: v})})
+    .then(function(r){ return r.json(); })
+    .then(function(x){ busy--; if (!x.ok) throw new Error(x.error || 'ng'); take(x.state); setStat('保存しました'); })
+    .catch(function(){ busy--; setStat('保存できませんでした。もう一度押してください', true); });
+}
+function load(first){
+  if (busy) return;
+  fetch(API + '?k=' + encodeURIComponent(K) + (first ? '&board=1' : '') + '&_=' + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(x){
+      if (!x.ok) throw new Error(x.error || 'ng');
+      if (x.board) { build(x.board); ready = true; }
+      if (!busy && ready) take(x.state);
+      if (first) setStat('');
+    })
+    .catch(function(){ if (first) { document.getElementById('now').textContent = '開けませんでした。リンクをもう一度押してください。'; } });
+}
+form.addEventListener('click', function(e){
+  var b = e.target.closest ? e.target.closest('.opt') : null; if (!b) return;
+  var q = b.getAttribute('data-q'), v = b.getAttribute('data-v');
+  if (S.A[q] === v) return;
+  send(q, 'a', v);
+  var card = document.getElementById(q), qq = Q[IDS.indexOf(q)], o = qq.o.filter(function(o){ return o[0] === v; })[0];
+  if (o && o[3]) { var d = card.querySelector('details'); d.open = true; d.querySelector('textarea').focus(); return; }
+  var idx = IDS.indexOf(q), next = null;
+  for (var k = idx + 1; k < Q.length; k++) { if (!S.A[Q[k].id]) { next = Q[k].id; break; } }
+  if (next) setTimeout(function(){ document.getElementById(next).scrollIntoView({behavior:'smooth', block:'start'}); }, 300);
+});
+form.addEventListener('change', function(e){
+  var q = e.target.getAttribute && e.target.getAttribute('data-m'); if (!q) return;
+  var v = e.target.value.replace(/\s+$/, ''); if (v !== (S.M[q] || '')) send(q, 'm', v);
+});
+if (!K) { document.getElementById('now').textContent = 'リンクが正しくありません。届いたリンクをそのまま押してください。'; }
+else {
+  load(true);
+  setInterval(function(){ if (ready && document.visibilityState !== 'hidden') load(false); }, 20000);
+  document.addEventListener('visibilitychange', function(){ if (ready && document.visibilityState === 'visible') load(false); });
+}
+</script>
+</body>
+</html>
