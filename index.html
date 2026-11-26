@@ -101,6 +101,19 @@ textarea.ans{min-height:84px}
 .card.mt .no{background:#3b6ea5}
 .card.mt .saved{color:#2b5a8c}
 textarea.ans+.row+.opts{margin-top:8px}
+details.db{background:#fff;border:1px solid var(--line);border-radius:14px;margin:0 0 12px;padding:0 14px}
+details.db>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:6px 12px;align-items:center;padding:14px 0}
+details.db>summary::-webkit-details-marker{display:none}
+.dn{font-weight:700;font-size:18px}.dc{font-size:14px;color:var(--sub);text-align:right;grid-column:3}.dc b{font-size:22px;color:var(--ink)}
+.dbar{grid-column:1/-1;height:8px;border-radius:4px;background:var(--line);overflow:hidden}.dbar i{display:block;height:100%;background:var(--ok)}
+.dtags{grid-column:1/3;display:flex;flex-wrap:wrap;gap:6px}.dtags em{font-style:normal;font-size:12px;border-radius:999px;padding:2px 10px;background:#f1eee8;color:var(--sub)}
+.dtags em.g{background:#edf3f8;color:#2b5a8c;font-weight:700}.dtags em.l{background:#f4efe6}.dtags em.ok{background:#e1f1e7;color:var(--ok);font-weight:700}
+.dl{grid-column:3;font-size:12px;color:var(--sub);text-align:right}
+table.dt{width:100%;border-collapse:collapse;font-size:14px;margin:0 0 14px}table.dt td{border-top:1px solid var(--line);padding:8px 4px;vertical-align:top}table.dt td:last-child{text-align:right;white-space:nowrap;width:1%}
+tr.sh td{background:var(--rule);font-weight:700;font-size:13px}
+.chip{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;background:#f1eee8;color:var(--sub)}
+tr.k_done .chip{background:#e1f1e7;color:var(--ok);font-weight:700}tr.k_mtg .chip{background:#edf3f8;color:#2b5a8c;font-weight:700}tr.k_later .chip{background:#f4efe6;color:#7a6a45}
+.dm{font-size:13px;color:#444;background:var(--rule);border-radius:8px;padding:6px 8px;margin-top:4px;white-space:pre-wrap}.da{font-size:11px;color:var(--sub);margin-top:2px}
 .btns{display:flex;gap:8px;flex:none}
 .undo{font:inherit;font-size:13px;color:var(--red);background:#fff;border:1px solid var(--red);border-radius:999px;padding:6px 14px;min-height:36px;cursor:pointer}
 .card.lt .later{color:#fff;background:var(--red);border:1px solid var(--red);font-weight:700}
@@ -224,7 +237,7 @@ function paint(){
   });
   $('logbox').style.display = (S.log && S.log.length) ? '' : 'none';
 }
-function take(x){ S = {A: x.A || {}, M: x.M || {}, T: x.T || {}, log: x.log || []}; paint(); }
+function take(x){ if (!x) return; S = {A: x.A || {}, M: x.M || {}, T: x.T || {}, log: x.log || []}; paint(); }
 var busy = 0, ready = false;
 function send(q, k, v){
   if (k === 'a') S.A[q] = v; else S.M[q] = v; paint();
@@ -239,11 +252,35 @@ function load(first){
   fetch(API + '?k=' + encodeURIComponent(K) + (first ? '&board=1' : '') + '&_=' + Date.now()).then(function(r){ return r.json(); })
     .then(function(x){
       if (!x.ok) throw new Error(x.error || 'ng');
+      if (x.dash) { dash(x.dash); ready = true; if (first) setStat(''); return; }
       if (x.board) { build(x.board); ready = true; }
       if (!busy && ready) take(x.state);
       if (first) setStat('');
     })
     .catch(function(){ if (first) $('now').textContent = '開けませんでした。リンクをもう一度押してください。'; });
+}
+function dash(d){
+  document.title = d.title; $('ttl').textContent = d.title; $('who').style.display = 'none'; $('bar').style.display = 'none'; $('logbox').style.display = 'none';
+  $('lead').textContent = 'ボードごとの進みです。20秒ごとに新しくなります。名前の行を押すと、項目ごとの答えが開きます。'; $('foot').textContent = '';
+  var T = 0, Dn = 0, G = 0, L = 0, last = 0, open = {};
+  Array.prototype.forEach.call(document.querySelectorAll('details.db'), function(x){ open[x.id] = x.open; });
+  var h = '';
+  d.boards.forEach(function(b){
+    T += b.total; Dn += b.done; G += b.mtg; L += b.later; if (b.last > last) last = b.last;
+    var rest = b.total - b.done - b.mtg - b.later, pc = b.total ? Math.round(b.done * 100 / b.total) : 0, id = 'db_' + b.k;
+    h += '<details class="db" id="' + id + '"' + (open[id] ? ' open' : '') + '><summary><span class="dn">' + esc(b.user) + ' さん</span><span class="dc"><b>' + b.done + '</b> / ' + b.total + '</span><span class="dbar"><i style="width:' + pc + '%"></i></span>'
+      + '<span class="dtags">' + (b.mtg ? '<em class="g">MTGで相談 ' + b.mtg + '</em>' : '') + (b.later ? '<em class="l">あとに回した ' + b.later + '</em>' : '') + (rest ? '<em>まだ ' + rest + '</em>' : '<em class="ok">全部済み</em>') + '</span><span class="dl">' + (b.last ? '最後の更新 ' + fmt(b.last) : 'まだ動きなし') + '</span></summary>';
+    h += '<p class="cap"><a class="open" href="?k=' + encodeURIComponent(b.k) + '" target="_blank" rel="noopener">▶ ' + esc(b.user) + 'さんのボードを開く</a>（開いて押すと、本人の答えとして保存されます）</p><table class="dt">';
+    var sec = '';
+    b.items.forEach(function(it){
+      if (it.sec !== sec && b.items.some(function(x){ return x.sec !== b.items[0].sec; })) { sec = it.sec; h += '<tr class="sh"><td colspan="2">' + esc(sec) + '</td></tr>'; }
+      var lab = it.kind === 'done' ? (it.lab || '記入あり') : it.kind === 'mtg' ? 'MTGで相談' : it.kind === 'later' ? 'あとに回した' : '—';
+      h += '<tr class="k_' + (it.kind || 'none') + '"><td>' + esc(it.t) + (it.m ? '<div class="dm">' + esc(it.m) + '</div>' : '') + '</td><td><span class="chip">' + esc(lab) + '</span>' + (it.at ? '<div class="da">' + fmt(it.at) + '</div>' : '') + '</td></tr>';
+    });
+    h += '</table></details>';
+  });
+  form.innerHTML = h;
+  $('now').className = 'now'; $('now').textContent = '全体：' + T + ' 件のうち 済み ' + Dn + ' 件' + (G ? '・MTGで相談 ' + G + ' 件' : '') + (L ? '・あとに回した ' + L + ' 件' : '') + (last ? '（最後の更新 ' + fmt(last) + '）' : '');
 }
 function nextIn(q){
   var cards = $(q).parentNode ? Array.prototype.slice.call($('it_' + Q[QI[q]].sec).children) : [], i = cards.indexOf($(q));
