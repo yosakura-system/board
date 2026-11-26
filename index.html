@@ -93,6 +93,8 @@ textarea.ans{min-height:84px}
 .foot2{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;min-height:36px}
 .foot2 .saved{margin:0}
 .later{font:inherit;font-size:13px;color:var(--sub);background:#fff;border:1px dashed #b9b4ab;border-radius:999px;padding:6px 14px;min-height:36px;cursor:pointer;flex:none}
+.btns{display:flex;gap:8px;flex:none}
+.undo{font:inherit;font-size:13px;color:var(--red);background:#fff;border:1px solid var(--red);border-radius:999px;padding:6px 14px;min-height:36px;cursor:pointer}
 .card.lt .later{color:#fff;background:var(--red);border:1px solid var(--red);font-weight:700}
 .pgw{height:6px;border-radius:3px;background:var(--line);margin-top:4px;overflow:hidden;max-width:220px}
 .pgw i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
@@ -128,7 +130,7 @@ var form = $('form'), stat = $('stat');
 function setStat(t, ng){ stat.textContent = t; stat.className = 'stat' + (ng ? ' ng' : ''); }
 function isLater(q){ return S.A[q.id] === '保留'; }
 function isDone(q){ if (isLater(q)) return false; return q.type === 'text' ? !!(S.M[q.id] || '').trim() : !!S.A[q.id]; }
-function word(q, v){ if (v === '保留') return 'あとに回した'; if (!v) return '元に戻した'; var o = (q.o || []).filter(function(o){ return o[0] === v; })[0]; return v + '（' + (o ? o[1] : '') + '）'; }
+function word(q, v){ if (v === '保留') return 'あとに回した'; if (!v) return '取り消した'; var o = (q.o || []).filter(function(o){ return o[0] === v; })[0]; return v + '（' + (o ? o[1] : '') + '）'; }
 function getOpen(){ try { return JSON.parse(localStorage.getItem(OPENKEY) || 'null'); } catch (e) { return null; } }
 function setOpen(){ var o = {}; Array.prototype.forEach.call(document.querySelectorAll('details.sec'), function(d){ o[d.id] = d.open; }); try { localStorage.setItem(OPENKEY, JSON.stringify(o)); } catch (e) {} }
 function fillImgs(){ Array.prototype.forEach.call(document.querySelectorAll('img[data-img]'), function(im){ var u = IMG[im.getAttribute('data-img')]; if (u && im.getAttribute('src') !== u) im.setAttribute('src', u); }); }
@@ -170,7 +172,7 @@ function build(b){
       q.o.forEach(function(o){ h += '<button type="button" class="opt" data-q="' + q.id + '" data-v="' + o[0] + '"><span class="k">' + o[0] + '</span><span class="t">' + esc(o[1]) + (o[2] ? '<small>' + esc(o[2]) + '</small>' : '') + '</span></button>'; });
       h += '</div><details class="memo"><summary>ひとこと（書かなくて大丈夫です）</summary><textarea data-m="' + q.id + '" placeholder="補足があれば"></textarea></details>';
     }
-    h += '<div class="foot2"><span class="saved" id="sv_' + q.id + '"></span><button type="button" class="later" data-later="' + q.id + '"></button></div>';
+    h += '<div class="foot2"><span class="saved" id="sv_' + q.id + '"></span><span class="btns"><button type="button" class="undo" data-undo="' + q.id + '">取り消す</button><button type="button" class="later" data-later="' + q.id + '"></button></span></div>';
     c.innerHTML = h; $('it_' + q.sec).appendChild(c);
   });
   $('bar').style.display = '';
@@ -187,6 +189,7 @@ function paint(){
     if (document.activeElement !== ta && ta.value !== (S.M[q.id] || '')) { ta.value = S.M[q.id] || ''; var dm = card.querySelector('details.memo'); if (dm && ta.value) dm.open = true; }
     $('sv_' + q.id).textContent = (done && S.T[q.id]) ? '保存済み　' + fmt(S.T[q.id]) : '';
     card.querySelector('.later').textContent = later ? '↑ いまやる（元に戻す）' : 'あとに回す';
+    card.querySelector('.undo').style.display = (!later && (S.A[q.id] || (S.M[q.id] || '').trim())) ? '' : 'none';
     per[q.sec] = per[q.sec] || [0, 0]; per[q.sec][1]++; if (done) { per[q.sec][0]++; n++; } if (later) m++;
     if (S.T[q.id] > last) last = S.T[q.id];
   });
@@ -207,7 +210,7 @@ function paint(){
   var ol = $('log'); ol.innerHTML = '';
   (S.log || []).slice().reverse().forEach(function(e){
     var q = Q[QI[e.q]]; if (!q) return; var li = document.createElement('li');
-    li.textContent = fmt(e.t) + '　' + q.t.slice(0, 18) + (q.t.length > 18 ? '…' : '') + '：' + (e.k === 'm' ? (e.v || '（消した）') : word(q, e.v));
+    li.textContent = fmt(e.t) + '　' + q.t.slice(0, 18) + (q.t.length > 18 ? '…' : '') + '：' + (e.k === 'm' ? (e.v || '書いた文を消した') : word(q, e.v));
     ol.appendChild(li);
   });
   $('logbox').style.display = (S.log && S.log.length) ? '' : 'none';
@@ -241,6 +244,8 @@ function nextIn(q){
 form.addEventListener('click', function(e){
   var t = e.target, lt = t.closest ? t.closest('.later') : null, b = t.closest ? t.closest('.opt') : null;
   if (lt) { var id = lt.getAttribute('data-later'); send(id, 'a', S.A[id] === '保留' ? '' : '保留'); return; }
+  var ud = t.closest ? t.closest('.undo') : null;
+  if (ud) { var u = ud.getAttribute('data-undo'); if (S.A[u]) send(u, 'a', ''); if ((S.M[u] || '').trim()) send(u, 'm', ''); return; }
   if (!b) return;
   var q = b.getAttribute('data-q'), v = b.getAttribute('data-v'), qq = Q[QI[q]];
   if (S.A[q] === v) return;
