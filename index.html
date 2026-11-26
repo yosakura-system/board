@@ -114,6 +114,8 @@ tr.sh td{background:var(--rule);font-weight:700;font-size:13px}
 .chip{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;background:#f1eee8;color:var(--sub)}
 tr.k_done .chip{background:#e1f1e7;color:var(--ok);font-weight:700}tr.k_mtg .chip{background:#edf3f8;color:#2b5a8c;font-weight:700}tr.k_later .chip{background:#f4efe6;color:#7a6a45}
 .dm{font-size:13px;color:#444;background:var(--rule);border-radius:8px;padding:6px 8px;margin-top:4px;white-space:pre-wrap}.da{font-size:11px;color:var(--sub);margin-top:2px}
+#nav:empty{display:none}#nav{margin-top:10px}
+.navb{display:inline-block;font-weight:700;font-size:15px;color:#fff;background:#3a3d4d;border-radius:10px;padding:10px 16px;text-decoration:none;min-height:44px}
 .btns{display:flex;gap:8px;flex:none}
 .undo{font:inherit;font-size:13px;color:var(--red);background:#fff;border:1px solid var(--red);border-radius:999px;padding:6px 14px;min-height:36px;cursor:pointer}
 .card.lt .later{color:#fff;background:var(--red);border:1px solid var(--red);font-weight:700}
@@ -126,6 +128,7 @@ tr.k_done .chip{background:#e1f1e7;color:var(--ok);font-weight:700}tr.k_mtg .chi
 <header><div class="wrap">
   <div class="top"><h1 id="ttl"></h1><span class="who" id="who" style="display:none"></span></div>
   <p class="lead" id="lead"></p>
+  <div id="nav"></div>
   <div class="now" id="now">読み込み中…</div>
 </div></header>
 
@@ -167,6 +170,7 @@ function build(b){
   document.title = b.title || document.title;
   $('ttl').textContent = b.title || ''; $('lead').innerHTML = b.lead || ''; $('foot').textContent = b.foot || '';
   $('who').textContent = b.user ? b.user + ' さん' : ''; $('who').style.display = b.user ? '' : 'none';
+  $('nav').innerHTML = b.dash ? '<a class="navb" href="?k=' + encodeURIComponent(b.dash) + '&from=' + encodeURIComponent(K) + '">全員の進みを見る ▶</a>' : '';
   form.innerHTML = '';
   var open = getOpen(), secs = (b.sections || []).concat([{id: 'later', title: 'あとに回したもの', note: '「いまやる」を押すと、元の場所に戻ります。'}]);
   secs.forEach(function(s, i){
@@ -260,6 +264,9 @@ function load(first){
     .catch(function(){ if (first) $('now').textContent = '開けませんでした。リンクをもう一度押してください。'; });
 }
 function dash(d){
+  var from = (location.search.match(/[?&]from=([^&]+)/) || [])[1] || '', me = null;
+  d.boards.forEach(function(b){ if (b.k === decodeURIComponent(from)) me = b; });
+  $('nav').innerHTML = me ? '<a class="navb" href="?k=' + encodeURIComponent(me.k) + '">◀ ' + esc(me.user) + 'さんの窓口へ戻る</a>' : '';
   document.title = d.title; $('ttl').textContent = d.title; $('who').style.display = 'none'; $('bar').style.display = 'none'; $('logbox').style.display = 'none';
   $('lead').textContent = 'ボードごとの進みです。20秒ごとに新しくなります。名前の行を押すと、項目ごとの答えが開きます。'; $('foot').textContent = '';
   var T = 0, Dn = 0, G = 0, L = 0, last = 0, open = {};
