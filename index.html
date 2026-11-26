@@ -93,6 +93,14 @@ textarea.ans{min-height:84px}
 .foot2{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;min-height:36px}
 .foot2 .saved{margin:0}
 .later{font:inherit;font-size:13px;color:var(--sub);background:#fff;border:1px dashed #b9b4ab;border-radius:999px;padding:6px 14px;min-height:36px;cursor:pointer;flex:none}
+.opts>.skip{grid-column:1/-1}
+.opt.mtg{margin-top:0}
+.opt.mtg.on{background:#edf3f8;border-color:#3b6ea5;border-style:solid}
+.opt.mtg.on .t{color:#2b5a8c;font-weight:700}
+.card.mt{border-color:#3b6ea5}
+.card.mt .no{background:#3b6ea5}
+.card.mt .saved{color:#2b5a8c}
+textarea.ans+.row+.opts{margin-top:8px}
 .btns{display:flex;gap:8px;flex:none}
 .undo{font:inherit;font-size:13px;color:var(--red);background:#fff;border:1px solid var(--red);border-radius:999px;padding:6px 14px;min-height:36px;cursor:pointer}
 .card.lt .later{color:#fff;background:var(--red);border:1px solid var(--red);font-weight:700}
@@ -129,8 +137,9 @@ function $(id){ return document.getElementById(id); }
 var form = $('form'), stat = $('stat');
 function setStat(t, ng){ stat.textContent = t; stat.className = 'stat' + (ng ? ' ng' : ''); }
 function isLater(q){ return S.A[q.id] === '保留'; }
-function isDone(q){ if (isLater(q)) return false; return q.type === 'text' ? !!(S.M[q.id] || '').trim() : !!S.A[q.id]; }
-function word(q, v){ if (v === '保留') return 'あとに回した'; if (!v) return '取り消した'; var o = (q.o || []).filter(function(o){ return o[0] === v; })[0]; return v + '（' + (o ? o[1] : '') + '）'; }
+function isMtg(q){ return S.A[q.id] === 'MTG'; }
+function isDone(q){ if (isLater(q) || isMtg(q)) return false; return q.type === 'text' ? !!(S.M[q.id] || '').trim() : !!S.A[q.id]; }
+function word(q, v){ if (v === 'MTG') return 'MTGで相談したい'; if (v === '保留') return 'あとに回した'; if (!v) return '取り消した'; var o = (q.o || []).filter(function(o){ return o[0] === v; })[0]; return v + '（' + (o ? o[1] : '') + '）'; }
 function getOpen(){ try { return JSON.parse(localStorage.getItem(OPENKEY) || 'null'); } catch (e) { return null; } }
 function setOpen(){ var o = {}; Array.prototype.forEach.call(document.querySelectorAll('details.sec'), function(d){ o[d.id] = d.open; }); try { localStorage.setItem(OPENKEY, JSON.stringify(o)); } catch (e) {} }
 function fillImgs(){ Array.prototype.forEach.call(document.querySelectorAll('img[data-img]'), function(im){ var u = IMG[im.getAttribute('data-img')]; if (u && im.getAttribute('src') !== u) im.setAttribute('src', u); }); }
@@ -166,11 +175,11 @@ function build(b){
     if (q.link) h += '<p class="cap"><a class="open" href="' + esc(q.link) + '" target="_blank" rel="noopener">▶ ' + esc(q.linkLabel || 'マニュアルを開く') + '</a></p>';
     h += (q.html || '');
     if (q.type === 'text') {
-      h += '<textarea class="ans" data-m="' + q.id + '" placeholder="' + esc(q.ph || 'ここに書いてください') + '"></textarea><div class="row"><button type="button" class="savebtn">保存する</button></div>';
+      h += '<textarea class="ans" data-m="' + q.id + '" placeholder="' + esc(q.ph || 'ここに書いてください') + '"></textarea><div class="row"><button type="button" class="savebtn">保存する</button></div><div class="opts"><button type="button" class="opt skip mtg" data-q="' + q.id + '" data-v="MTG"><span class="t">MTGで相談したい</span></button></div>';
     } else {
       h += '<div class="opts two">';
       q.o.forEach(function(o){ h += '<button type="button" class="opt" data-q="' + q.id + '" data-v="' + o[0] + '"><span class="k">' + o[0] + '</span><span class="t">' + esc(o[1]) + (o[2] ? '<small>' + esc(o[2]) + '</small>' : '') + '</span></button>'; });
-      h += '</div><details class="memo"><summary>ひとこと（書かなくて大丈夫です）</summary><textarea data-m="' + q.id + '" placeholder="補足があれば"></textarea></details>';
+      h += '<button type="button" class="opt skip mtg" data-q="' + q.id + '" data-v="MTG"><span class="t">MTGで相談したい</span></button></div><details class="memo"><summary>ひとこと（書かなくて大丈夫です）</summary><textarea data-m="' + q.id + '" placeholder="補足があれば"></textarea></details>';
     }
     h += '<div class="foot2"><span class="saved" id="sv_' + q.id + '"></span><span class="btns"><button type="button" class="undo" data-undo="' + q.id + '">取り消す</button><button type="button" class="later" data-later="' + q.id + '"></button></span></div>';
     c.innerHTML = h; $('it_' + q.sec).appendChild(c);
@@ -179,18 +188,18 @@ function build(b){
 }
 function paint(){
   if (!B) return;
-  var n = 0, m = 0, last = 0, per = {}, moved = false;
+  var n = 0, m = 0, g = 0, last = 0, per = {}, moved = false;
   Q.forEach(function(q){
     var card = $(q.id), v = S.A[q.id], later = isLater(q), done = isDone(q), target = $('it_' + (later ? 'later' : q.sec));
     if (card.parentNode !== target) { moved = true; }
-    card.className = 'card' + (done ? ' done' : '') + (later ? ' lt' : '');
-    Array.prototype.forEach.call(card.querySelectorAll('.opt'), function(b){ var on = b.getAttribute('data-v') === v; b.className = 'opt' + (on ? ' on' : ''); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+    card.className = 'card' + (done ? ' done' : '') + (later ? ' lt' : '') + (isMtg(q) ? ' mt' : '');
+    Array.prototype.forEach.call(card.querySelectorAll('.opt'), function(b){ var on = b.getAttribute('data-v') === v; b.className = b.className.replace(/ on$/, '') + (on ? ' on' : ''); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
     var ta = card.querySelector('textarea');
     if (document.activeElement !== ta && ta.value !== (S.M[q.id] || '')) { ta.value = S.M[q.id] || ''; var dm = card.querySelector('details.memo'); if (dm && ta.value) dm.open = true; }
-    $('sv_' + q.id).textContent = (done && S.T[q.id]) ? '保存済み　' + fmt(S.T[q.id]) : '';
+    $('sv_' + q.id).textContent = (done && S.T[q.id]) ? '保存済み　' + fmt(S.T[q.id]) : (isMtg(q) ? 'MTGで相談　' + fmt(S.T[q.id]) : '');
     card.querySelector('.later').textContent = later ? '↑ いまやる（元に戻す）' : 'あとに回す';
     card.querySelector('.undo').style.display = (!later && (S.A[q.id] || (S.M[q.id] || '').trim())) ? '' : 'none';
-    per[q.sec] = per[q.sec] || [0, 0]; per[q.sec][1]++; if (done) { per[q.sec][0]++; n++; } if (later) m++;
+    per[q.sec] = per[q.sec] || [0, 0]; per[q.sec][1]++; if (done) { per[q.sec][0]++; n++; } if (later) m++; if (isMtg(q)) g++;
     if (S.T[q.id] > last) last = S.T[q.id];
   });
   if (moved) {
@@ -206,7 +215,7 @@ function paint(){
   $('pg').style.width = (Q.length ? Math.round(n * 100 / Q.length) : 0) + '%';
   var now = $('now'), all = Q.length && n === Q.length;
   now.className = 'now' + (all ? ' all' : '');
-  now.textContent = all ? 'すべていただきました。ありがとうございます！（最後の更新 ' + fmt(last) + '）' : 'いまの状況：全部で ' + Q.length + ' 件・済み ' + n + ' 件' + (m ? '・あとに回した ' + m + ' 件' : '') + (last ? '（最後の更新 ' + fmt(last) + '）' : '');
+  now.textContent = all ? 'すべていただきました。ありがとうございます！（最後の更新 ' + fmt(last) + '）' : 'いまの状況：全部で ' + Q.length + ' 件・済み ' + n + ' 件' + (g ? '・MTGで相談 ' + g + ' 件' : '') + (m ? '・あとに回した ' + m + ' 件' : '') + (last ? '（最後の更新 ' + fmt(last) + '）' : '');
   var ol = $('log'); ol.innerHTML = '';
   (S.log || []).slice().reverse().forEach(function(e){
     var q = Q[QI[e.q]]; if (!q) return; var li = document.createElement('li');
@@ -251,7 +260,7 @@ form.addEventListener('click', function(e){
   if (S.A[q] === v) return;
   var nx = nextIn(q);
   send(q, 'a', v);
-  var o = qq.o.filter(function(o){ return o[0] === v; })[0];
+  var o = (qq.o || []).filter(function(o){ return o[0] === v; })[0];
   if (o && o[3]) { var d = $(q).querySelector('details.memo'); d.open = true; d.querySelector('textarea').focus(); return; }
   if (nx) setTimeout(function(){ nx.scrollIntoView({behavior: 'smooth', block: 'start'}); }, 300);
 });
